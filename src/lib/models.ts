@@ -12,12 +12,12 @@ export const MODELS: Model[] = [
     provider: "Google",
     description: "Fast and efficient multimodal model",
   },
-  // {
-  //   id: "deepseek/deepseek-v3.2",
-  //   name: "DeepSeek V3.2",
-  //   provider: "DeepSeek",
-  //   description: "Strong reasoning and coding capabilities",
-  // },
+  {
+    id: "deepseek/deepseek-v3.2",
+    name: "DeepSeek V3.2",
+    provider: "DeepSeek",
+    description: "Strong reasoning and coding capabilities",
+  },
   {
     id: "minimax/minimax-m2.7",
     name: "MiniMax M2.7",
