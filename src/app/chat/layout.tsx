@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 
-export default async function Home() {
+export default async function ChatLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await getCurrentUser();
-  if (user) {
-    redirect("/chat");
-  } else {
+  if (!user) {
     redirect("/login");
   }
+  return <>{children}</>;
 }

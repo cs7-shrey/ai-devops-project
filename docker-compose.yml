@@ -1,0 +1,67 @@
+services:
+  chatapp:
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+        JWT_SECRET: ${JWT_SECRET}
+    container_name: chatapp
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3004:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=production
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+        tag: "chatapp"
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: chatapp-loki
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: chatapp-promtail
+    restart: unless-stopped
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: chatapp-grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=chatapp2024
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
+  grafana-data:
